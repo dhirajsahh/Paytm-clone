@@ -20,13 +20,15 @@ const userSchema = mongoose.Schema({
     type: String,
     required: true,
     trim: true,
-    minLength: 50,
+    minLength: 3,
+    maxLength: 30,
   },
   lastName: {
     type: String,
     required: true,
     trim: true,
-    minLength: 50,
+    minLength: 3,
+    maxLength: 30,
   },
 });
 const User = mongoose.model("User", userSchema);
