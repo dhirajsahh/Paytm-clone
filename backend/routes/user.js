@@ -5,6 +5,7 @@ const { User } = require("../models/userModel");
 const router = express.Router();
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const authMiddleware = require("../middleware/authMiddleware");
 const JWT_SECRET = process.env.JWT_SECRET;
 
 const userdetails = zod.object({
@@ -74,5 +75,38 @@ router.post("/signin", async (req, res) => {
     console.log("error occured while login", err);
     res.send("Something went wrong");
   }
+});
+
+const updatebody = zod.object({
+  password: zod.string().optional(),
+  firstName: zod.string().optional(),
+  lastName: zod.string().optional(),
+});
+router.put("/update", authMiddleware, async (req, res) => {
+  const response = updatebody.safeParse(req.body);
+
+  if (!response.success) {
+    res.status(411).json({
+      message: "Error whle updating Information",
+    });
+  }
+  const updateData = {};
+  if (req.body.firstName) {
+    updateData.firstName = req.body.firstName;
+  }
+  if (req.body.lastName) {
+    updateData.lastName = req.body.lastName;
+  }
+  if (req.body.password) {
+    const hashPassword = await bcrypt.hash(req.body.password, 10);
+    updateData.password = hashPassword;
+  }
+  if (Object.keys(updateData).length === 0) {
+    return res.status(400).json({ message: "Nothing to update" });
+  }
+  const user = await User.findByIdAndUpdate(req.userId, updateData);
+  return res.json({
+    message: "updated Successfully",
+  });
 });
 module.exports = router;
