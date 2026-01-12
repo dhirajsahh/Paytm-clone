@@ -4,7 +4,9 @@ const JWT_SECRET = process.env.JWT_SECRET;
 const authMiddleware = (req, res, next) => {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith("Bearer")) {
-    return res.status(403).json({});
+    return res.status(403).json({
+      message: "Invalid token",
+    });
   }
   const token = authHeader.split(" ")[1];
   try {
